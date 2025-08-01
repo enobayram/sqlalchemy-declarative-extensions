@@ -163,6 +163,19 @@ class Trigger(base.Trigger):
 
         components.append(quote_name(self.on))
 
+        if (
+            self.for_each == TriggerForEach.statement
+            and len(self.events) == 1
+            and self.events[0] != TriggerEvents.truncate
+        ):
+            components.append("REFERENCING")
+
+            event = self.events[0]
+            if event in [TriggerEvents.update, TriggerEvents.delete]:
+                components.append("OLD TABLE AS old_table")
+            if event in [TriggerEvents.update, TriggerEvents.insert]:
+                components.append("NEW TABLE AS new_table")
+
         components.append("FOR EACH")
         components.append(self.for_each.value)
 
